@@ -295,11 +295,13 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
    info->geometry.aspect_ratio = RACE_GEOMETRY_ASPECT_RATIO;
 }
 
+#define CPU_FREQ 6144000 
+
 void retro_run(void)
 {
    race_input();
 
-   tlcs_execute((6*1024*1024) / HOST_FPS);
+   tlcs_execute(CPU_FREQ / HOST_FPS);
 
    static int16_t sampleBuffer[2048];
    static int16_t stereoBuffer[2048];
