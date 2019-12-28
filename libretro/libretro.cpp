@@ -24,7 +24,7 @@ static retro_input_state_t input_state_cb;
 #define RACE_VERSION "v2.16"
 #define RACE_EXTENSIONS "ngp|ngc|ngpc|npc"
 #define RACE_TIMING_FPS 60.25
-#define RACE_GEOMETRY_BASE_W 160 
+#define RACE_GEOMETRY_BASE_W 160
 #define RACE_GEOMETRY_BASE_H 152
 #define RACE_GEOMETRY_MAX_W 160
 #define RACE_GEOMETRY_MAX_H 152
@@ -319,7 +319,7 @@ void retro_run(void)
       p[1] = sampleBuffer[i];
       p += 2;
    }
-   
+
    audio_batch_cb(stereoBuffer, samplesPerFrame);
 
    bool updated = false;
@@ -362,15 +362,15 @@ bool retro_load_game(const struct retro_game_info *info)
    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
    screen = (ngp_screen*)calloc(1, sizeof(*screen));
-   
+
    if (!screen)
       return false;
-   
+
    screen->w = FB_WIDTH;
    screen->h = FB_HEIGHT;
 
    screen->pixels = calloc(1, FB_WIDTH * FB_HEIGHT * RETRO_PIX_BYTES);
-      
+
    if (!screen->pixels)
    {
       free(screen);
@@ -384,6 +384,18 @@ bool retro_load_game(const struct retro_game_info *info)
       return false;
 
    check_variables();
+
+   // TODO: Mappings might need updating
+   // Size is based on what is exposed in Mednafen NGP
+   // but RACE! maps cpuram @ mainram[128*1024]
+   // Works fine however in Rockman Battle Fighters for 1st few achievements
+   struct retro_memory_descriptor descs = {
+      RETRO_MEMDESC_SYSTEM_RAM, mainram, 0, 0, 0, 0, 16384, "RAM"
+   };
+   struct retro_memory_map retro_map = {
+      &descs, 1
+   };
+   environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &retro_map);
 
    initialized = true;
    return true;
