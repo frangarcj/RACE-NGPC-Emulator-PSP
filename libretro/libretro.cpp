@@ -5,12 +5,13 @@
 #include "../StdAfx.h"
 #include "../state.h"
 #include "../neopopsound.h"
+#include "../sound.h"
 #include "../input.h"
 #include "../flash.h"
 #include "../tlcs900h.h"
 #include "../memory.h"
 #include "../graphics.h"
-#include "../neopopsound.h"
+#include "../state.h"
 
 static retro_log_printf_t log_cb;
 static retro_video_refresh_t video_cb;
@@ -311,8 +312,8 @@ void retro_run(void)
 
    memset(sampleBuffer, 0, samplesPerFrame * sizeof(int16_t));
 
-   sound_update((unsigned short*)sampleBuffer, samplesPerFrame * sizeof(int16_t)); //Get sound data
-   dac_update((unsigned short*)sampleBuffer, samplesPerFrame * sizeof(int16_t));
+   sound_update((uint16_t*)sampleBuffer, samplesPerFrame * sizeof(int16_t)); //Get sound data
+   dac_update((uint16_t*)sampleBuffer, samplesPerFrame * sizeof(int16_t));
 
    int16_t        *p        = stereoBuffer;
    for (int i = 0; i < samplesPerFrame; i++)

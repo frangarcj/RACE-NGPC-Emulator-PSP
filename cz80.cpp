@@ -74,7 +74,7 @@ u32 Cz80_Reset(cz80_struc *cpu)
 {
     cz80_struc *CPU = cpu;
     
-    fast_memset(CPU, 0, (u32*)(&(CPU->CycleSup)) - (u32*)(&(CPU->BC)));
+    fast_memset(CPU, 0, (uintptr_t)(&(CPU->CycleSup)) - (uintptr_t)(&(CPU->BC)));
 
     Cz80_Set_PC(CPU, 0);
     zIX = 0xFFFF;

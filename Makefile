@@ -526,7 +526,7 @@ include Makefile.common
 OBJECTS := $(SOURCES_CXX:.cpp=.o) $(SOURCES_C:.c=.o) $(SOURCES_ASM:.s=.o)
 
 ifeq ($(DEBUG),1)
-FLAGS += -O0
+FLAGS += -O0 -g
 else
 FLAGS += -O2 -DNDEBUG
 endif

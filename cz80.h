@@ -2,7 +2,7 @@
 /*                                                                              */
 /* CZ80 include file                                                            */
 /* C Z80 emulator version 0.92                                                  */
-/* Copyright 2004-2005 St�phane Dallongeville                                   */
+/* Copyright 2004-2005 Stéphane Dallongeville                                   */
 /*                                                                              */
 /********************************************************************************/
 

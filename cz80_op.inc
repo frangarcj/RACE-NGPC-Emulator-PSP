@@ -2,7 +2,7 @@
 /*                                                                              */
 /* CZ80 opcode include source file                                              */
 /* C Z80 emulator version 0.92                                                  */
-/* Copyright 2004-2005 Stéphane Dallongeville                                   */
+/* Copyright 2004-2005 StÃ©phane Dallongeville                                   */
 /*                                                                              */
 /********************************************************************************/
 
@@ -1016,56 +1016,56 @@ OP_RRA:
     OP(0xd2):   // JP   NC,nn
 OP_JP_NC:
         if (!(zF & CZ80_CF)) goto OP_JP;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10);
 
     OP(0xda):   // JP   C,nn
 OP_JP_C:
         if (zF & CZ80_CF) goto OP_JP;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10);
 
     OP(0xe2):   // JP   PO,nn
 OP_JP_PO:
         if (!(zF & CZ80_VF)) goto OP_JP;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10);
 
     OP(0xea):   // JP   PE,nn
 OP_JP_PE:
         if (zF & CZ80_VF) goto OP_JP;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10);
 
     OP(0xf2):   // JP   P,nn
 OP_JP_P:
         if (!(zF & CZ80_SF)) goto OP_JP;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10);
 
     OP(0xfa):   // JP   M,nn
 OP_JP_M:
         if (zF & CZ80_SF) goto OP_JP;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10);
 
     OP(0xca):   // JP   Z,nn
 OP_JP_Z:
         if (zF & CZ80_ZF) goto OP_JP;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10);
 
     OP(0xc2):   // JP   NZ,nn
 OP_JP_NZ:
         if (!(zF & CZ80_ZF)) goto OP_JP;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10);
 
@@ -1086,28 +1086,28 @@ OP_JP_xx:
     OP(0x38):   // JR   C,n
 OP_JR_C:
         if (zF & CZ80_CF) goto OP_JR;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+1;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+1;
 	SET_PC(newPC);
         RET(7)
 
     OP(0x30):   // JR   NC,n
 OP_JR_NC:
         if (!(zF & CZ80_CF)) goto OP_JR;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+1;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+1;
 	SET_PC(newPC);
         RET(7)
 
     OP(0x28):   // JR   Z,n
 OP_JR_Z:
         if (zF & CZ80_ZF) goto OP_JR;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+1;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+1;
 	SET_PC(newPC);
         RET(7)
 
     OP(0x20):   // JR   NZ,n
 OP_JR_NZ:
         if (!(zF & CZ80_ZF)) goto OP_JR;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+1;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+1;
 	SET_PC(newPC);
         RET(7)
 
@@ -1115,7 +1115,7 @@ OP_JR_NZ:
 OP_DJNZ:
         Z80_ICount--;
         if (--zB) goto OP_JR;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+1;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+1;
 	SET_PC(newPC);
         RET(9)
 
@@ -1126,7 +1126,7 @@ OP_JR:
 
         FETCH_BYTE_S(adr);
         // no rebase needed here...
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+adr;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+adr;
 	SET_PC(newPC);
         RET(12)
     }
@@ -1136,56 +1136,56 @@ OP_JR:
     OP(0xd4):   // CALL NC,nn
 OP_CALL_NC:
         if (!(zF & CZ80_CF)) goto OP_CALL;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10)
 
     OP(0xdc):   // CALL C,nn
 OP_CALL_C:
         if (zF & CZ80_CF) goto OP_CALL;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10)
 
     OP(0xe4):   // CALL PO,nn
 OP_CALL_PO:
         if (!(zF & CZ80_VF)) goto OP_CALL;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10)
 
     OP(0xec):   // CALL PE,nn
 OP_CALL_PE:
         if (zF & CZ80_VF) goto OP_CALL;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10)
 
     OP(0xf4):   // CALL P,nn
 OP_CALL_P:
         if (!(zF & CZ80_SF)) goto OP_CALL;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10)
 
     OP(0xfc):   // CALL M,nn
 OP_CALL_M:
         if (zF & CZ80_SF) goto OP_CALL;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10)
 
     OP(0xcc):   // CALL Z,nn
 OP_CALL_Z:
         if (zF & CZ80_ZF) goto OP_CALL;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10)
 
     OP(0xc4):   // CALL NZ,nn
 OP_CALL_NZ:
         if (!(zF & CZ80_ZF)) goto OP_CALL;
-	newPC=(((unsigned)zPC)-((unsigned)mame4all_cz80_rom))+2;
+	newPC=(((uintptr_t)zPC)-((uintptr_t)mame4all_cz80_rom))+2;
 	SET_PC(newPC);
         RET(10)
     }

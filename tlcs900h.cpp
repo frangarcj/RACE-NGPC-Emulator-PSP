@@ -736,7 +736,8 @@ unsigned int gen_regsPC, gen_regsSR;
 #endif
 
 // declare ldc registers
-unsigned char __attribute__ ((__aligned__(4))) ldcRegs[64];
+// 12-29-19 FIXME: should be aligned, but this crashes save states
+unsigned char /*__attribute__ ((__aligned__(4))) */ldcRegs[64];
 
 // declare struct for easy access to flags of flag register
 //struct SR0 {
