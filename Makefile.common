@@ -1,8 +1,7 @@
 LIBRETRO_COMM_DIR  = $(CORE_DIR)/libretro-common
 DEPS_DIR          = $(CORE_DIR)/deps
 
-INCFLAGS = -I$(CORE_DIR)/ \
-			  -I$(CORE_DIR)/libretro
+INCFLAGS = -I$(CORE_DIR)/ -I$(CORE_DIR)/libretro -I$(DEPS_DIR)/zlib-1.2.8
 
 ifneq (,$(findstring msvc2003,$(platform)))
 INCFLAGS += -I$(LIBRETRO_COMM_DIR)/include/compat/msvc
@@ -12,7 +11,6 @@ SOURCES_C := $(CORE_DIR)/unzip.c \
 	$(CORE_DIR)/ioapi.c
 
 ifneq ($(STATIC_LINKING), 1)
-INCFLAGS += -I$(DEPS_DIR)/zlib-1.2.8
 SOURCES_C += $(DEPS_DIR)/zlib-1.2.8/adler32.c \
 	$(DEPS_DIR)/zlib-1.2.8/crc32.c \
 	$(DEPS_DIR)/zlib-1.2.8/inflate.c \
