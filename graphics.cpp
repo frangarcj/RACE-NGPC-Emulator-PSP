@@ -55,7 +55,7 @@ unsigned short drawBuffer[NGPC_SIZEX*NGPC_SIZEY];
 
 #else
 
-unsigned short *drawBuffer;
+static unsigned short *drawBuffer;
 
 #endif
 

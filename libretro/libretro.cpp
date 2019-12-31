@@ -413,6 +413,13 @@ bool retro_load_game_special(unsigned, const struct retro_game_info*, size_t)
 void retro_unload_game(void)
 {
    initialized = false;
+
+   if (screen)
+   {
+      if (screen->pixels)
+         free(screen->pixels);
+      free(screen);
+   }
 }
 
 void retro_cheat_reset(void)
