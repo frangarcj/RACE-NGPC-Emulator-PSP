@@ -57,6 +57,8 @@ unsigned char __attribute__ ((__aligned__(4))) mainrom[4*1024*1024];
 unsigned char __attribute__ ((__aligned__(4))) cpurom[256*1024];//prob only needs 0x10000
 //
 unsigned char __attribute__ ((__aligned__(4))) *cpuram;
+// declare ldc registers
+unsigned char __attribute__ ((__aligned__(4))) ldcRegs[64];
 
 //
 // preliminary address map:
