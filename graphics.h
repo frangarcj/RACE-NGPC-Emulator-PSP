@@ -71,7 +71,7 @@ void graphics_debug(FILE *f);
 
 extern unsigned short palettes[16*4+16*4+16*4]; // placeholder for the converted palette
 extern int    totalpalette[32*32*32];
-#define NGPC_TO_SDL16(col) totalpalette[col]
+#define NGPC_TO_SDL16(col) totalpalette[col & 0x0FFF]
 
 #define setColPaletteEntry(addr, data) palettes[(addr)] = NGPC_TO_SDL16(data)
 #define setBWPaletteEntry(addr, data) palettes[(addr)] = NGPC_TO_SDL16(data)
