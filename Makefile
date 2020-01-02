@@ -1,3 +1,5 @@
+WANT_ZIP=0
+
 TARGET_NAME := race
 GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"
 ifneq ($(GIT_VERSION)," unknown")
@@ -529,6 +531,10 @@ ifeq ($(DEBUG),1)
 FLAGS += -O0 -g
 else
 FLAGS += -O2 -DNDEBUG
+endif
+
+ifeq ($(WANT_ZIP),1)
+FLAGS += -DWANT_ZLIB
 endif
 
 ifeq (,$(findstring msvc,$(platform)))

@@ -282,6 +282,7 @@ char *getFileNameExtension(char *nom_fichier)		{
 	return ptrPoint;
 }
 
+#ifdef WANT_ZIP
 int loadFromZipByName(unsigned char *buffer, char *archive, char *filename, int *filesize)
 {
     char name[_MAX_PATH];
@@ -369,6 +370,7 @@ int loadFromZipByName(unsigned char *buffer, char *archive, char *filename, int 
     memcpy(filename, name, _MAX_PATH);
     return 1;
 }
+#endif // WANT_ZIP
 
 /*
     Verifies if a file is a ZIP archive or not.
@@ -412,6 +414,8 @@ int handleInputFile(char *romName)
 	//if it's a ZIP file, we need to handle that here.
 	iDepth = strrchr2(romName, '.');
 	iDepth++;
+
+#ifdef WANT_ZIP
 	if( ( strcmp( romName + iDepth, "zip" ) == 0 ) || ( strcmp( romName + iDepth, "ZIP" ) == 0 ))
 	{
 		//get ROM from ZIP
@@ -433,6 +437,7 @@ int handleInputFile(char *romName)
 		}
 	}
 	else
+#endif // WANT_ZIP
 	{
 		//get ROM from binary ROM file
 		romFile = fopen(romName, "rb");
