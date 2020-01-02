@@ -37,16 +37,10 @@ static retro_input_state_t input_state_cb;
 // core options
 static int RETRO_SAMPLE_RATE = 44100;
 
-static int RETRO_PIX_BYTES = 2;
-static int RETRO_PIX_DEPTH = 16;
-
 ngp_screen* screen;
-int setting_ngp_language;
+int setting_ngp_language; // 0x6F87 - language
 int gfx_hacks;
-int tipo_consola;
-
-static bool newFrame = false;
-static bool initialized = false;
+int tipo_consola; // 0x6F91 - OS version
 
 char retro_save_directory[2048];
 
@@ -67,20 +61,9 @@ unsigned retro_api_version(void)
    return RETRO_API_VERSION;
 }
 
-static void update_geometry()
-{
-   struct retro_system_av_info info;
-
-   retro_get_system_av_info(&info);
-   environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &info);
-}
-
 void graphics_paint()
 {
-   if(RETRO_PIX_BYTES == 2)
-      video_cb(screen->pixels, screen->w, screen->h, FB_WIDTH * RETRO_PIX_BYTES);
-   else if(RETRO_PIX_BYTES == 4)
-      video_cb(screen->pixels, screen->w, screen->h, FB_WIDTH * RETRO_PIX_BYTES);
+   video_cb(screen->pixels, screen->w, screen->h, FB_WIDTH << 1);
 }
 
 static void check_variables(void)
@@ -98,46 +81,6 @@ static void check_variables(void)
       else if (!strcmp(var.value, "english"))
          setting_ngp_language = 1;
    }
-
-   var.key = "race_sound_sample_rate";
-   var.value = NULL;
-
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-   {
-      static bool once = false;
-
-      if(!once)
-      {
-         RETRO_SAMPLE_RATE = atoi(var.value);
-         once = true;
-      }
-   }
-
-   RETRO_PIX_BYTES = 2;
-   RETRO_PIX_DEPTH = 16;
-   /*
-   var.key = "ngp_gfx_colors";
-   var.value = NULL;
-
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-   {
-      static bool once = false;
-
-      if(!once)
-      {
-         if (strcmp(var.value, "16bit") == 0)
-         {
-            RETRO_PIX_BYTES = 2;
-            RETRO_PIX_DEPTH = 16;
-         }
-         else if (strcmp(var.value, "24bit") == 0)
-         {
-            RETRO_PIX_BYTES = 4;
-            RETRO_PIX_DEPTH = 24;
-         }
-         once = true;
-      }
-   }*/
 }
 void retro_init(void)
 {
@@ -152,24 +95,11 @@ void retro_init(void)
 
    check_variables();
 
-   if(RETRO_PIX_BYTES == 4) {
-      enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
-      if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt)) {
-         if(log_cb)
-            log_cb(RETRO_LOG_ERROR, "[could not set RGB8888]\n");
-         RETRO_PIX_BYTES = 2;
-      }
-   }
+   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
+   if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt) && log_cb)
+      log_cb(RETRO_LOG_ERROR, "[could not set RGB565]\n");
 
-   if(RETRO_PIX_BYTES == 2) {
-      enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
-      if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt) && log_cb) {
-         log_cb(RETRO_LOG_ERROR, "[could not set RGB565]\n");
-      }
-   }
-
-
-   uint64_t serialization_quirks = RETRO_SERIALIZATION_QUIRK_SINGLE_SESSION;
+   uint64_t serialization_quirks = RETRO_SERIALIZATION_QUIRK_PLATFORM_DEPENDENT;
    environ_cb(RETRO_ENVIRONMENT_SET_SERIALIZATION_QUIRKS, &serialization_quirks);
 }
 
@@ -234,24 +164,12 @@ static void race_input(void)
    ngpInputState = 0;
    input_poll_cb();
    ngpInputState = get_race_input();
-
 }
 
 static bool race_initialize_sound(void)
 {
     system_sound_chipreset();
     return true;
-}
-
-static int file_exists(const char *path)
-{
-   FILE *dummy = fopen(path, "rb");
-
-   if (!dummy)
-      return 0;
-
-   fclose(dummy);
-   return 1;
 }
 
 static bool race_initialize_system(const char* gamepath)
@@ -279,7 +197,6 @@ void retro_get_system_info(struct retro_system_info *info)
 #endif
 
    info->need_fullpath    = true;
-
    info->library_version  = RACE_VERSION GIT_VERSION;
    info->valid_extensions = RACE_EXTENSIONS;
    info->block_extract    = false;
@@ -296,7 +213,7 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
    info->geometry.aspect_ratio = RACE_GEOMETRY_ASPECT_RATIO;
 }
 
-#define CPU_FREQ 6144000 
+#define CPU_FREQ 6144000
 
 void retro_run(void)
 {
@@ -307,15 +224,15 @@ void retro_run(void)
    static int16_t sampleBuffer[2048];
    static int16_t stereoBuffer[2048];
    /* Get the number of samples in a frame */
-   uint16_t samplesPerFrame = RETRO_SAMPLE_RATE
-      / HOST_FPS;
+   uint16_t samplesPerFrame = RETRO_SAMPLE_RATE / HOST_FPS;
 
    memset(sampleBuffer, 0, samplesPerFrame * sizeof(int16_t));
 
    sound_update((uint16_t*)sampleBuffer, samplesPerFrame * sizeof(int16_t)); //Get sound data
    dac_update((uint16_t*)sampleBuffer, samplesPerFrame * sizeof(int16_t));
 
-   int16_t        *p        = stereoBuffer;
+   int16_t *p = stereoBuffer;
+   
    for (int i = 0; i < samplesPerFrame; i++)
    {
       p[0] = sampleBuffer[i];
@@ -373,7 +290,7 @@ bool retro_load_game(const struct retro_game_info *info)
    screen->w = FB_WIDTH;
    screen->h = FB_HEIGHT;
 
-   screen->pixels = calloc(1, FB_WIDTH * FB_HEIGHT * RETRO_PIX_BYTES);
+   screen->pixels = calloc(1, FB_WIDTH * FB_HEIGHT * 2);
 
    if (!screen->pixels)
    {
@@ -391,8 +308,6 @@ bool retro_load_game(const struct retro_game_info *info)
 
    // TODO: Mappings might need updating
    // Size is based on what is exposed in Mednafen NGP
-   // but RACE! maps cpuram @ mainram[128*1024]
-   // Works fine however in Rockman Battle Fighters for 1st few achievements
    struct retro_memory_descriptor descs = {
       RETRO_MEMDESC_SYSTEM_RAM, mainram, 0, 0, 0, 0, 16384, "RAM"
    };
@@ -401,7 +316,6 @@ bool retro_load_game(const struct retro_game_info *info)
    };
    environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &retro_map);
 
-   initialized = true;
    return true;
 }
 
@@ -412,13 +326,12 @@ bool retro_load_game_special(unsigned, const struct retro_game_info*, size_t)
 
 void retro_unload_game(void)
 {
-   initialized = false;
-
    if (screen)
    {
       if (screen->pixels)
          free(screen->pixels);
       free(screen);
+      screen = NULL;
    }
 }
 
