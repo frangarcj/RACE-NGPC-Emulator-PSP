@@ -98,9 +98,6 @@ void retro_init(void)
    enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
    if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt) && log_cb)
       log_cb(RETRO_LOG_ERROR, "[could not set RGB565]\n");
-
-   uint64_t serialization_quirks = RETRO_SERIALIZATION_QUIRK_PLATFORM_DEPENDENT;
-   environ_cb(RETRO_ENVIRONMENT_SET_SERIALIZATION_QUIRKS, &serialization_quirks);
 }
 
 void retro_reset(void)
