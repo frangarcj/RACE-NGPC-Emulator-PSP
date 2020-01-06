@@ -54,6 +54,7 @@ void graphicsBlitInit();
 void graphicsBlitLine(unsigned char render);
 void myGraphicsBlitLine(unsigned char render);
 void graphicsBlitEnd();
+void graphicsSetDarkFilterLevel(unsigned filterLevel);
 // renderer for Gameboy Color
 void gbcGraphicsBlitInit();
 void gbcGraphicsBlitLine();

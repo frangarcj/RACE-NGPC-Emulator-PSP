@@ -47,6 +47,14 @@ int zoom=0;
 //
 int    totalpalette[32*32*32];
 
+// Allows application of a 'dark filter' to reduce the
+// glare of white backgrounds when viewing NGP content
+// on a backlit screen
+// Note: This code has no consistency regarding variable
+// names - so we just use the normal libretro standard of
+// delimiter-separated words...
+static unsigned dark_filter_level = 0;
+
 #ifdef __GP32__
 
 #define OFFSETX 80
@@ -425,6 +433,41 @@ void palette_init32(DWORD dwRBitMask, DWORD dwGBitMask, DWORD dwBBitMask)
     }*/
 }
 
+// RGB range: [0,1]
+void darken_rgb(float &r, float &g, float &b)
+{
+    // Note: This is *very* approximate...
+    // - Should be done in linear colour space. It isn't.
+    // - Should alter brightness by performing an RGB->HSL->RGB
+    //   conversion. We just do simple linear scaling instead.
+    // Basically, this is intended for use on devices that are
+    // too weak to run shaders (i.e. why would you want a 'dark filter'
+    // if your device supports proper LCD shaders?). We therefore
+    // cut corners for the sake of performance...
+    //
+    // Constants
+    // > Luminosity factors: photometric/digital ITU BT.709
+    //static const float luma_r = 0.2126f;
+    //static const float luma_g = 0.7152f;
+    //static const float luma_b = 0.0722f;
+    // > Luminosity factors: Digital ITU BT.601
+    //   (seems to produce better results than ITU BT.709)
+    static const float luma_r = 0.299f;
+    static const float luma_g = 0.587f;
+    static const float luma_b = 0.114f;
+    // Calculate luminosity
+    float luma = (luma_r * r) + (luma_g * g) + (luma_b * b);
+    // Get 'darkness' scaling factor
+    // > User set 'dark filter' level scaled by current luminosity
+    //   (i.e. lighter colours affected more than darker colours)
+    float dark_factor = 1.0f - ((static_cast<float>(dark_filter_level) * 0.01f) * luma);
+    dark_factor = dark_factor < 0.0f ? 0.0f : dark_factor;
+    // Perform scaling...
+    r = r * dark_factor;
+    g = g * dark_factor;
+    b = b * dark_factor;
+}
+
 void palette_init16(DWORD dwRBitMask, DWORD dwGBitMask, DWORD dwBBitMask)
 {
     //dbg_print("in palette_init16(0x%X, 0x%X, 0x%X)\n", dwRBitMask, dwGBitMask, dwBBitMask);
@@ -471,15 +514,68 @@ void palette_init16(DWORD dwRBitMask, DWORD dwGBitMask, DWORD dwBBitMask)
     {
         case NGP:
         case NGPC:
-        for (b=0; b<16; b++)
-            for (g=0; g<16; g++)
-                for (r=0; r<16; r++)
-                    totalpalette[b*256+g*16+r] =
-                        (((b<<(BBitCount-4))+(b>>(4-(BBitCount-4))))<<BShiftCount) +
-                        (((g<<(GBitCount-4))+(g>>(4-(GBitCount-4))))<<GShiftCount) +
-                        (((r<<(RBitCount-4))+(r>>(4-(RBitCount-4))))<<RShiftCount);
-        break;
+            if (dark_filter_level > 0)
+            {
+                static const float rgb_max = 15.0f;
+                static const float rgb_max_inv = 1.0f / rgb_max;
+                float r_float, g_float, b_float;
+                int r_final, g_final, b_final;
+
+                // Perform RGB assignment with colour conversion
+                for (b=0; b<16; b++)
+                {
+                    for (g=0; g<16; g++)
+                    {
+                        for (r=0; r<16; r++)
+                        {
+                            // Convert colour range from [0,0xF] to [0,1]
+                            r_float = static_cast<float>(r) * rgb_max_inv;
+                            g_float = static_cast<float>(g) * rgb_max_inv;
+                            b_float = static_cast<float>(b) * rgb_max_inv;
+                            // Perform image darkening
+                            darken_rgb(r_float, g_float, b_float);
+                            // Convert back to 4bit unsigned
+                            r_final = static_cast<int>((r_float * rgb_max) + 0.5f) & 0xF;
+                            g_final = static_cast<int>((g_float * rgb_max) + 0.5f) & 0xF;
+                            b_final = static_cast<int>((b_float * rgb_max) + 0.5f) & 0xF;
+
+                            totalpalette[b*256+g*16+r] =
+                                (((b_final<<(BBitCount-4))+(b_final>>(4-(BBitCount-4))))<<BShiftCount) +
+                                (((g_final<<(GBitCount-4))+(g_final>>(4-(GBitCount-4))))<<GShiftCount) +
+                                (((r_final<<(RBitCount-4))+(r_final>>(4-(RBitCount-4))))<<RShiftCount);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Use fast RGB assignment
+                for (b=0; b<16; b++)
+                    for (g=0; g<16; g++)
+                        for (r=0; r<16; r++)
+                            totalpalette[b*256+g*16+r] =
+                                (((b<<(BBitCount-4))+(b>>(4-(BBitCount-4))))<<BShiftCount) +
+                                (((g<<(GBitCount-4))+(g>>(4-(GBitCount-4))))<<GShiftCount) +
+                                (((r<<(RBitCount-4))+(r>>(4-(RBitCount-4))))<<RShiftCount);
+            }
+            break;
     }
+}
+
+// Again, there is no consistency in naming...
+// Most interface functions seem to use camel case,
+// so do the same here...
+void graphicsSetDarkFilterLevel(unsigned filterLevel)
+{
+#ifdef __LIBRETRO__
+    unsigned prev_dark_filter_level = dark_filter_level;
+
+    dark_filter_level = filterLevel;
+    dark_filter_level = (dark_filter_level > 100) ? 100 : dark_filter_level;
+
+    if (dark_filter_level != prev_dark_filter_level)
+        palette_init16(0xf800,0x7e0,0x1f);
+#endif
 }
 
 void palette_init8(DWORD dwRBitMask, DWORD dwGBitMask, DWORD dwBBitMask)

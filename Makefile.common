@@ -1,7 +1,7 @@
 LIBRETRO_COMM_DIR  = $(CORE_DIR)/libretro-common
 DEPS_DIR          = $(CORE_DIR)/deps
 
-INCFLAGS = -I$(CORE_DIR)/ -I$(CORE_DIR)/libretro -I$(DEPS_DIR)/zlib-1.2.8
+INCFLAGS = -I$(CORE_DIR)/ -I$(CORE_DIR)/libretro -I$(LIBRETRO_COMM_DIR)/include -I$(DEPS_DIR)/zlib-1.2.8
 
 ifneq (,$(findstring msvc2003,$(platform)))
 INCFLAGS += -I$(LIBRETRO_COMM_DIR)/include/compat/msvc

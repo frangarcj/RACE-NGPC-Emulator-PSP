@@ -1,4 +1,5 @@
 #include "libretro.h"
+#include "libretro_core_options.h"
 #include "log.h"
 #include <string.h>
 
@@ -69,7 +70,8 @@ void graphics_paint()
 
 static void check_variables(void)
 {
-   struct retro_variable var = {0};
+   struct retro_variable var  = {0};
+   unsigned dark_filter_level = 0;
 
    var.key = "race_language";
    var.value = NULL;
@@ -84,6 +86,15 @@ static void check_variables(void)
       else if (!strcmp(var.value, "english"))
          setting_ngp_language = 0;
    }
+
+   var.key   = "race_dark_filter_level";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      dark_filter_level = static_cast<unsigned>(atoi(var.value));
+   }
+   graphicsSetDarkFilterLevel(dark_filter_level);
 }
 void retro_init(void)
 {
@@ -94,7 +105,8 @@ void retro_init(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY, &dir) && dir)
       sprintf(retro_save_directory, "%s%c", dir, path_default_slash_c());
 
-   printf("%s\n",retro_save_directory);
+   if (log_cb)
+      log_cb(RETRO_LOG_INFO, "[RACE]: Save directory: %s.\n", retro_save_directory);
 
    check_variables();
 
@@ -121,14 +133,9 @@ void retro_deinit(void)
 
 void retro_set_environment(retro_environment_t cb)
 {
-   static const struct retro_variable vars[] = {
-      { "race_language", "Language; japanese|english" },
-      { NULL, NULL },
-   };
-
-   cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
-
    environ_cb = cb;
+
+   libretro_set_core_options(environ_cb);
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
